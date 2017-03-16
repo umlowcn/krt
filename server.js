@@ -12,7 +12,8 @@ app.use(morgan('combined'))
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+    //mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+    mongoURL = 'mongodb://cnc:cnc@ds031257.mlab.com:31257/cncdb';
     mongoURLLabel = "";
 
 if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
@@ -90,6 +91,20 @@ app.get('/pagecount', function (req, res) {
     res.send('{ pageCount: -1 }');
   }
 });
+
+  app.get('/routines', function (req, res, next) {
+    var collection = db.collection('routines');
+
+    collection.find()
+      .toArray(function (err, result) {
+        if (err) {
+          console.log(err);
+        }
+        if (result.length) {
+          res.send(result);
+        }
+      });
+  });
 
 // error handling
 app.use(function(err, req, res, next){
