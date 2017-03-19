@@ -136,9 +136,9 @@ app.use(function(err, req, res, next){
 //   console.log('Error connecting to Mongo. Message:\n'+err);
 // });
 
-dbClient.connect();
-
-app.listen(port, ip);
-console.log('Server running on http://%s:%s', ip, port);
+dbClient.connect(function (err) {
+  app.listen(port, ip);
+  console.log('Server running on http://%s:%s', ip, port);
+});
 
 module.exports = app ;
