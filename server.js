@@ -106,6 +106,35 @@ app.get('/pagecount', function (req, res) {
       });
   });
 
+  app.get('/rewards/:date/:userId', function (req, res, next) {
+    var db = dbClient.getDb();
+    var collection = db.collection('rewards');
+
+    var cursor = collection.aggregate([
+      {
+        $match:
+        {
+          date: req.params.date,
+          userId: req.params.userId
+        }
+      },
+      {
+        $lookup:
+        {
+          from: "routines",
+          localField: "routineId",
+          foreignField: "_id",
+          as: "routines"
+        }
+      }
+    ]);
+
+    cursor.toArray(function (err, result) {
+      console.log(JSON.stringify(result, undefined, 2));
+      res.send(result);
+    });
+  });
+
 // error handling
 app.use(function(err, req, res, next){
   console.error(err.stack);
