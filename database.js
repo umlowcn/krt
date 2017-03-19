@@ -3,8 +3,7 @@ var MongoClient = mongodb.MongoClient;
 var _db;
 var url = 'mongodb://cnc:cnc@ds031257.mlab.com:31257/cncdb'; // mlab URL
 
-export const dbClient = 
-    {
+module.exports = {
     connect: function (callback) {
         MongoClient.connect(url, function (err, db) {
             console.log("Connected to database");
