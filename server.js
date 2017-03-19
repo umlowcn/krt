@@ -107,7 +107,6 @@ app.get('/pagecount', function (req, res) {
   });
 
   app.get('/rewards/:date/:userId', function (req, res, next) {
-    var db = dbClient.getDb();
     var collection = db.collection('rewards');
 
     var cursor = collection.aggregate([
