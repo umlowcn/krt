@@ -5,10 +5,10 @@ var express = require('express'),
     eps     = require('ejs'),
     morgan  = require('morgan');
     
-Object.assign=require('object-assign')
+var dbClient = require('./database.js');
 
 app.engine('html', require('ejs').renderFile);
-app.use(morgan('combined'))
+app.use(morgan('combined'));
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
@@ -35,8 +35,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
 
   }
 }
-var db = null,
-    dbDetails = new Object();
+var db = null;
 
 var initDb = function(callback) {
   if (mongoURL == null) return;
@@ -51,48 +50,15 @@ var initDb = function(callback) {
     }
 
     db = conn;
-    dbDetails.databaseName = db.databaseName;
-    dbDetails.url = mongoURLLabel;
-    dbDetails.type = 'MongoDB';
-
+   
     console.log('Connected to MongoDB at: %s', mongoURL);
   });
 };
 
-app.get('/', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    var col = db.collection('counts');
-    // Create a document with request IP and current time of request
-    col.insert({ip: req.ip, date: Date.now()});
-    col.count(function(err, count){
-      res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
-    });
-  } else {
-    res.render('index.html', { pageCountMessage : null});
-  }
-});
 
-app.get('/pagecount', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    db.collection('counts').count(function(err, count ){
-      res.send('Page Count: ' + (count + 10) );
-    });
-  } else {
-    res.send('{ pageCount: -1 }');
-  }
-});
 
   app.get('/routines', function (req, res, next) {
+     var db = dbClient.getDb();
     var collection = db.collection('routines');
 
     collection.find()
@@ -107,6 +73,7 @@ app.get('/pagecount', function (req, res) {
   });
 
   app.get('/rewards', function (req, res, next) {
+    var db = dbClient.getDb();
     var collection = db.collection('rewards');
 
     collection.find()
@@ -121,6 +88,7 @@ app.get('/pagecount', function (req, res) {
   });
 
   app.get('/rewards/:date', function (req, res, next) {
+     var db = dbClient.getDb();
     var collection = db.collection('rewards');
 
     console.log("getrewardbyDate: " + req.params.date);
@@ -130,6 +98,7 @@ app.get('/pagecount', function (req, res) {
   });
 
   app.get('/rewards/:date/:userId', function (req, res, next) {
+     var db = dbClient.getDb();
     var collection = db.collection('rewards');
 
     var cursor = collection.aggregate([
@@ -163,9 +132,11 @@ app.use(function(err, req, res, next){
   res.status(500).send('Something bad happened!');
 });
 
-initDb(function(err){
-  console.log('Error connecting to Mongo. Message:\n'+err);
-});
+// initDb(function(err){
+//   console.log('Error connecting to Mongo. Message:\n'+err);
+// });
+
+dbClient.connect();
 
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
