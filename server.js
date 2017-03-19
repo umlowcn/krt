@@ -106,6 +106,17 @@ app.get('/pagecount', function (req, res) {
       });
   });
 
+  app.get('/reward/:date', function (req, res, next) {
+    var collection = db.collection('rewards');
+
+    console.log("getrewardbyDate: " + req.params.date);
+    collection.find({ date: req.params.date }).toArray(function (err, result) {
+      console.log(result);
+      console.log(JSON.stringify(result));
+      res.json(result);
+    });
+  });
+
   app.get('/rewards/:date/:userId', function (req, res, next) {
     var collection = db.collection('rewards');
 
