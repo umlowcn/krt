@@ -106,6 +106,20 @@ app.get('/pagecount', function (req, res) {
       });
   });
 
+  app.get('/rewards', function (req, res, next) {
+    var collection = db.collection('rewards');
+
+    collection.find()
+      .toArray(function (err, result) {
+        if (err) {
+          console.log(err);
+        }
+        if (result.length) {
+          res.send(result);
+        }
+      });
+  });
+
   app.get('/rewards/:date', function (req, res, next) {
     var collection = db.collection('rewards');
 
